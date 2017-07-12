@@ -1,6 +1,3 @@
-# FP_ESD
-**To share L4 code with FP folks!**
-
 *Author Name* 			: Kalyan Pingali
 
 *File Description* 	: LCD Driver, i2c driver, UI - Lab 4; Embedded System Design - Fall 2016
