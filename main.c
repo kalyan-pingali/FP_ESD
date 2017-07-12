@@ -42,7 +42,7 @@ int random_count_value;
 int counter_for_io_exp =0;
 
 
-// Initializes Serial Communication using
+// Initializes Serial Communication
 void initialize_serial_communication()
 {
     	TMOD = 0x20; 				// Using timer 1; mode 2
