@@ -1,6 +1,6 @@
 *Author Name* 			: Kalyan Pingali
 
-*File Description* 	: LCD Driver, i2c driver, UI - Lab 4; Embedded System Design - Fall 2016
+*File Description* 	: LCD Driver, i2c driver, IO Expander, EEPROM
 
 *Version*				: 7.0
 
@@ -12,7 +12,7 @@
      
 2.0 : I2C drivers added
      
-3.0 : UI developed to meet requirements of lab 4
+3.0 : UI developed to meet requirements
      
 4.0 : Added functionality for creating custom characters on LCD
      
