@@ -1,6 +1,7 @@
-// Author Name 		: Kalyan Pingali
-// File Description 	: LCD Driver, i2c driver, UI - Lab 4; Embedded System Design - Fall 2016
+// File Description 	: LCD Driver, i2c driver, UI
 // Version		: 7.0
+// Author Name 		: Kalyan Pingali
+// Contact Information	: pnglkalyan@gmail.com
 
 // Revision History :
 //      1.0 : Basic LCD functionality achieved
