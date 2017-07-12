@@ -41,6 +41,8 @@ unsigned char lcd_current_pointer;
 int random_count_value;
 int counter_for_io_exp =0;
 
+
+// Initializes Serial Communication using
 void initialize_serial_communication()
 {
     	TMOD = 0x20; 				// Using timer 1; mode 2
@@ -52,13 +54,15 @@ void initialize_serial_communication()
     	SBUF = 0;				// Initializing SBUF to 0
 }
 
+// Used to overwrite the default startup, by modifying amount of external memory available
 void _sdcc_external_startup()
 {
-	AUXR = AUXR | 0x0C;
-	WDTPRG = 0x07;				//Hardware Watchdog Timer's Timeout time of 2.09 seconds
+	AUXR = AUXR | 0x0C;			// 1 MB of external memory hidden by internal memory
+	WDTPRG = 0x07;				// Hardware Watchdog Timer's Timeout time of 2.09 seconds
 	//CMOD = CMOD | 0x40;			// Enabling Watchdog timer mode on PCA module 4
 }
 
+// Writes a single character over serial instead of Standard Output
 void putchar(char c)
 {
     	//EA = 1;
@@ -70,7 +74,8 @@ void putchar(char c)
 	TI = 0;  				// clear TI flag
 }
 
-int putstr(char *s)				// prints/sends a string of characters over serial
+// Sends a string of characters over serial
+int putstr(char *s)
 {
 	int i = 0;
 	while (*s){				// output characters until NULL found
@@ -80,6 +85,7 @@ int putstr(char *s)				// prints/sends a string of characters over serial
 	return i+1;
 }
 
+// Receive character from Serial instead of Standard Input
 char getchar()
 {
     	//EA = 1;
@@ -92,25 +98,28 @@ char getchar()
 	return SBUF;  				// return character from SBUF
 }
 
+// Stall processor for specified number of milli seconds
 void delay(unsigned int milli_seconds)  	// Function to provide time delay in msec
 {
-int i,j;
-for(i=0;i<milli_seconds;i++)
-{
-	for(j=0;j<1275;j++);			// Generates ~1 milli second delay on 8051 using clock of 11.0592 MHz
-}
+	int i,j;
+	for(i=0;i<milli_seconds;i++)
+	{
+		for(j=0;j<1275;j++);		// Generates ~1 milli second delay on 8051 using clock of 11.0592 MHz
+	}
 }
 
 //########################## LCD Specific commands Start here ############################
-void lcdcmd(char a)
+// Basic execute function to LCD; Commands sent through MMIO (external data)
+void lcdcmd(char instruction)
 {
 	xdata unsigned int *xdata write_address = 0xEAAA;		// Address EAAA => Sets enable within range (0xE000 and 0xEFFF)
 	//printf_tiny("DEBUG : Character to write is : %d\n\r\n\r", a);
 	RS = 0;								// RS is cleared
 	RW = 0;								// Writing mode
-	*write_address = a;						// Sending data
+	*write_address = instruction;					// Sending data
 }
 
+// Initialization sequence for LCD
 void lcdinit()
 {
     //printf_tiny("DEBUG : lcdinit called\n\r\n\r");				
@@ -133,6 +142,7 @@ void lcdinit()
 	delay(5);                                               	// Adding delay for additional safety
 }
 
+// Stall call to LCD if previous command is still in execution
 void lcdbusywait()
 {
 	//xdata char *lcddata = 0xEAAA;
@@ -145,6 +155,7 @@ void lcdbusywait()
     	}
 }
 
+// Go to a particular cell of the LCD
 void lcdgotoaddr(unsigned char addr)
 {
 	/*unsigned char current_address;
@@ -162,6 +173,7 @@ void lcdgotoaddr(unsigned char addr)
     	//delay(100);
 }
 
+// Go to a particular x,y co-ordinate of LCD
 void lcdgotoxy(unsigned char row, unsigned char column)
 {
 	unsigned char address;
@@ -205,6 +217,7 @@ void lcdgotoxy(unsigned char row, unsigned char column)
 	lcdgotoaddr(address);
 }
 
+// Write character to LCD at current cursor address
 void lcdputch(char cc)
 {
 	xdata unsigned int *xdata write_address = 0xEAAA;	// Address EAAA => Sets enable within range (0xE000 and 0xEFFF)
@@ -215,6 +228,7 @@ void lcdputch(char cc)
 	//printf_tiny("DEBUG : Character to be written is : %c\n\r\n\r", cc);
 }
 
+// Write string to LCD starting at current cursor address
 void lcdputstr(char *ss)
 {
 
@@ -270,6 +284,7 @@ void lcdputstr(char *ss)
 //##########################  LCD Specific commands End here  ############################
 
 //########################## I2C EEPROM Specific commands Start here ############################
+// EEPROM is external memory! Read : http://ecee.colorado.edu/~mcclurel/Microchip_24LC16B_Datasheet_21703G.pdf
 
 // This function implements the initialization of i2c
 void i2cinit(void)
@@ -540,7 +555,7 @@ unsigned char* intToIntStr(int intVal)
     	return c1;
 }
 
-
+// Convert integer to string
 unsigned char * convert_str(int number)
 {
     	unsigned char * output=0;
@@ -556,7 +571,9 @@ unsigned char * convert_str(int number)
     	return output;
 }
 
+//#######################  Interrupt Service Routines being here  ##########################
 
+// Interrupt zero handling
 void timer_isr (void) __critical __interrupt (1)
 {
     	TR0 = 0;
@@ -615,8 +632,7 @@ void timer_isr (void) __critical __interrupt (1)
     	*lcddata = lcd_current_pointer;
 }
 
-
-
+// Interrupt 0 handling
 void int0_isr() __critical __interrupt (0)
 {
     	unsigned char ioExpState;
@@ -637,7 +653,9 @@ void int0_isr() __critical __interrupt (0)
     	//IT0 = 1;
 }
 
+//#######################  Interrupt Service Routines end here  ##########################
 
+// Read LCD RAM data
 void readRAMData(void)
 {
     	unsigned char read_data;
@@ -648,6 +666,7 @@ void readRAMData(void)
     	printf_tiny(" %x", read_data);
 }
 
+// Convert hex array to hex characters
 unsigned char convert_hex(char input[], int limit)
 {
     	int iterate_over_string_variable;
@@ -673,6 +692,7 @@ unsigned char convert_hex(char input[], int limit)
     	return (unsigned char)hex_value;
 }
 
+// Convert integer to string
 unsigned char* int_to_str(int integer_input)
 {
     	unsigned char* output_str=0;
@@ -691,6 +711,7 @@ unsigned char* int_to_str(int integer_input)
     	return output_str;
 }
 
+// Create custom LCD character
 void lcd_create_char(unsigned char cgram_char_code, unsigned char rows[])
 {
     	unsigned char iterate_variable;
@@ -705,7 +726,7 @@ void lcd_create_char(unsigned char cgram_char_code, unsigned char rows[])
     	}
 }
 
-
+// Hardware Watchdog usage
 void enable_Hardware_WatchDog_Timer(void)
 {
     	WDTRST = 0x1E;                                                 	//Enabling HW Watchdog Timer
