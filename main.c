@@ -441,6 +441,8 @@ void i2c_EEPROM_reset(void)
 //##########################  I2C EEPROM Specific commands End here  ############################
 
 //######################  I2C IO Expander Specific commands Start here  #########################
+
+// Configure IO Expander as Input or Output
 void i2c_IO_Expander_Configure_IO(unsigned char inp_or_out)
 {
     	int ack;
@@ -459,7 +461,7 @@ void i2c_IO_Expander_Configure_IO(unsigned char inp_or_out)
     	i2c_stop();
 }
 
-
+// Get the current state of IO Expander
 unsigned char i2c_IO_Expander_Get_Current_State()
 {
     	int ack;
@@ -571,9 +573,9 @@ unsigned char * convert_str(int number)
     	return output;
 }
 
-//#######################  Interrupt Service Routines being here  ##########################
+//#######################  Interrupt Service Routines begin here  ##########################
 
-// Interrupt zero handling
+// Interrupt zero handling : Restarts the RTC on LCD
 void timer_isr (void) __critical __interrupt (1)
 {
     	TR0 = 0;
@@ -632,7 +634,7 @@ void timer_isr (void) __critical __interrupt (1)
     	*lcddata = lcd_current_pointer;
 }
 
-// Interrupt 0 handling
+// Interrupt 0 handling : Counts the number of button (interrupt 0) presses using IO Exp, and displays count on LCD
 void int0_isr() __critical __interrupt (0)
 {
     	unsigned char ioExpState;
@@ -1266,12 +1268,12 @@ void main(void)
                         		}
                     		}break;*/
 
-                		case '0':
+                		case '0':			// Print string to show working of text wrap on LCD
                     		{
                         		lcdputstr("A really long meaningless sentence to show wrapping of data on LCD display!");
                     		}break;
 		
-	                	case '1':
+	                	case '1':			// Move cursor on LCD
         	        	{
                         		printf_tiny("\r\n(x,y) location map of the LCD:\r\n");
                         		printf_tiny("\r\n y  x  0     1     2     3     4     5     6     7     8     9     10    11    12    13    14    15");
@@ -1330,7 +1332,7 @@ void main(void)
                         		//lcdgotoxy(convert_hex(&j,1), convert_hex(&k,1));
                     		}break;
 
-                		case '2':       		// Clear LCD display!
+                		case '2':       		// Clear LCD display! (By re-initializing LCD)
                     		{
                        			lcdinit();
                     		}break;
